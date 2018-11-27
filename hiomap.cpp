@@ -315,7 +315,6 @@ static void ipmi_hiomap_event_response(IpmiCmdData cmd, bool status)
     using namespace phosphor::logging;
     int rc;
 
-    log<level::INFO>("Completing property update");
     if (!status)
     {
         log<level::ERR>("Failed to deliver host command",
@@ -329,12 +328,8 @@ static void ipmi_hiomap_event_response(IpmiCmdData cmd, bool status)
         rc = sd_event_source_set_enabled(event_source, SD_EVENT_ON);
         if (rc < 0)
         {
-            log<level::WARNING>("Failed to enable SIGTERM delivery",
+            log<level::WARNING>("Failed to unblock SIGTERM delivery",
                                 entry("RC=%d", rc));
-        }
-        else
-        {
-            log<level::INFO>("Unblocked SIGTERM");
         }
     }
 }
@@ -347,18 +342,13 @@ static int hiomap_handle_property_update(struct hiomap *ctx,
     std::map<std::string, sdbusplus::message::variant<bool>> msgData;
     int rc;
 
-    log<level::INFO>("Preparing property update");
     if (!active_event_updates)
     {
         rc = sd_event_source_set_enabled(event_source, SD_EVENT_OFF);
         if (rc < 0)
         {
-            log<level::WARNING>("Failed to disable SIGTERM delivery",
+            log<level::WARNING>("Failed to block SIGTERM delivery",
                                 entry("RC=%d", rc));
-        }
-        else
-        {
-            log<level::INFO>("Blocked SIGTERM");
         }
     }
     active_event_updates++;
